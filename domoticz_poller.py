@@ -29,14 +29,26 @@ class TempHumDelegate(DefaultDelegate):
 
 	def handleNotification(self, cHandle, data):
 		if (cHandle == TEMP_HUM_READ_HANDLE):
+			data = data.rstrip(' \t\r\n\0')
 			temperature = data.split(" ")[0][2:]
 			humidity = data.split(" ")[1][2:]
+			comfort_type = get_comfort_type(humidity)
 			if (sensor_id != -1 and battery_level > -1):
-				request_url = 'http://' + DOMOTICZ_SERVER + '/json.htm?type=command&param=udevice&idx=' + str(sensor_id) + '&nvalue=0&svalue=' + temperature + ';' + humidity + '&battery=' + str(battery_level)
+				request_url = 'http://' + DOMOTICZ_SERVER + '/json.htm?type=command&param=udevice&idx=' + str(sensor_id) + '&nvalue=0&svalue=' + temperature + ';' + humidity + ';' + comfort_type + '&battery=' + str(battery_level)
 				send_to_domoticz(request_url)
 
 def send_to_domoticz(url):
 	requests.get(url, auth=(DOMOTICZ_USERNAME, DOMOTICZ_PASSWORD))
+
+def get_comfort_type(humidity):
+	comfort_type = "0"
+	if float(humidity) < 40:
+		comfort_type = "2"
+	elif float(humidity) <= 70:
+		comfort_type = "1"
+	elif float(humidity) > 70:
+		comfort_type = "3"
+	return comfort_type
 
 def get_battery_value():
 	battery_value = 0;
