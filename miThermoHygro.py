@@ -1,3 +1,4 @@
+#!/usr/bin/env python2
 import binascii
 import base64
 import requests
